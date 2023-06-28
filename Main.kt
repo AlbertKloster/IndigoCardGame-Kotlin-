@@ -1,16 +1,42 @@
 package indigo
 
-fun main() {
-    val ranks = listOf("A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K")
-    val suits = listOf("♦", "♥", "♠", "♣")
-    val deck = mutableListOf<String>()
-    for (rank in ranks) {
-        for (suit in suits) {
-            deck.add(rank + suit)
-        }
-    }
+val cardDeckService = CardDeckService()
 
-    println(ranks.joinToString(" "))
-    println(suits.joinToString(" "))
-    println(deck.joinToString(" "))
+fun main() {
+    var exit = false
+    while (!exit) {
+        try {
+            println("Choose an action (reset, shuffle, get, exit):")
+            when (Actions.getAction(readln())) {
+                Actions.EXIT -> exit = true
+                Actions.RESET -> reset()
+                Actions.SHUFFLE -> shuffle()
+                Actions.GET -> get()
+            }
+        } catch (e: RuntimeException) {
+            println(e.message)
+        }
+
+    }
+    println("Bye")
+}
+
+private fun reset() {
+    cardDeckService.reset()
+    println("Card deck is reset.")
+}
+
+private fun shuffle() {
+    cardDeckService.shuffle()
+    println("Card deck is shuffled.")
+}
+
+private fun get() {
+    println("Number of cards:")
+    val input = readln()
+    if (!input.matches(Regex("[1-4]?[0-9]|5[0-2]"))) throw RuntimeException("Invalid number of cards.")
+    val numberOfCards = input.toInt()
+    if (numberOfCards == 0) throw RuntimeException("Invalid number of cards.")
+    val removedCards = cardDeckService.get(numberOfCards)
+    println(removedCards.joinToString(" ") { "${it.rank.string}${it.suit.string}" })
 }
