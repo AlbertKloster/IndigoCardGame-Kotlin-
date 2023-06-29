@@ -1,214 +1,161 @@
-# Stage 4/5: The game logic
+# Stage 5/5: Player VS Computer
 ## Description
-We will implement the game rules in this stage. The game loop is ready, but the program can't do anything; the cards are just piling up on the table.
+It is time to make the computer smarter. Until now, the computer played a random card, but now it will follow a certain strategy.
 
-The game rules are easy:
+For testing purposes, print the computer cards in hand before the computer chooses a card.
 
-1. Four cards are placed face-up on the table;
-2. Six cards are dealt to each player;
-3. The players take turns in playing cards. If the card has the same suit or rank as the topmost card, then the player wins all the cards on the table;
-4. When both players have no cards in hand, go to step 2 unless there are no more remaining cards in the card deck.
-5. <b>The remaining cards on the table go to the player who won the cards last.</b> In the rare case where none of the players win any cards, then all cards go to the player who played first.
+From now on, we will introduce the term candidate cards. They are the cards in hand that can win the cards on the table.
 
-When a card with the same suit or rank as the top card on the table is played, the one who tossed it wins all of the cards on the table. The program in this situation should save the cards for the winner before clearing the table of all cards. The program should be <b>keeping track</b> of all cards won by the two players.
+The strategy is as follows:
 
-The program should also count the points of each player, so develop a point system. The cards with the ranks `A`, `10`, `J`, `Q`, `K` get 1 point each, while the player who has the most cards gets three points. If the players have the same number of cards, then the player who played first gets these points. The total points in this game are 23. The player with the most points wins the game.
+1) If there is only one card in hand, put it on the table (Example 2);
+
+2) If there is only one candidate card, put it on the table (Example 3);
+
+3) If there are no cards on the table:
+   - If there are cards in hand with the same suit, throw one of them at random (Example 4). For example, if the cards in hand are `7♥ 9♥ 8♣ A♠ 3♦ 7♦ Q♥` (multiple `♥`, and `♦` suits), the computer will play one card at random.
+   - If there are no cards in hand with the same suit, but there are cards with the same rank (this situation occurs only when there are 4 or fewer cards in hand), then throw one of them at random (Example 5). For example, if the cards in hand are `7♦ 7♥ 4♠ K♣`, throw one of `7♦` `7♥` at random.
+   - If there are no cards in hand with the same suit or rank, throw any card at random. For example, if the cards in hand are `9♥ 8♣ A♠ 3♦`, throw any of them at random.
+
+4) If there are cards on the table but no candidate cards, use the same tactics as in step 3. That is:
+   - If there are cards in hand with the same suit, throw one of them at random (Example 6). For example, if the top card on the table is `A♦`, and the cards in hand are `6♣ Q♥ 8♣ J♠ 7♣` (multiple `♣` suit), the computer will place any of `6♣` `8♣` `7♣` at random.
+   - If there are no cards in hand with the same suit, but there are cards with the same rank (this may occur when there are 3 or fewer cards in hand), throw one of them at random (Example 7). For example, if the top card on the table is `A♦` and the cards in hand are `J♠ Q♥ J♣`, put one of `J♠` `J♣` at random.
+   - If there are no cards in hand with the same suit or rank, then put any card at random. For example, if the top card on the table is `A♦`, and the cards in hand are `J♠ Q♥ K♣`, throw any of them at random.
+
+5) If there are two or more candidate cards:
+   - If there are 2 or more candidate cards with the same suit as the top card on the table, throw one of them at random (Example 8). For example, if the top card on the table is `5♥`, and the cards in hand are `6♥ 8♣ 5♠ 7♦ 7♥`, then the candidate cards are `6♥ 7♥ 5♠`. There are 2 candidate cards with the same suit as the top card on the table, `6♥ 7♥`. Place any at random.
+   - If the above isn't applicable, but there are 2 or more candidate cards with the same rank as the top card on the table, throw one of them at random (example 9). For example, if the top card on the table is `J♥`, and the cards in hand are `3♥ J♣ J♠ 6♦`, then the candidate cards are `3♥ J♣ J♠`. In this case, there are no 2 or more candidate cards with the same suit, but there are 2 candidate cards with the same rank as the top card on the table that are `J♣ J♠`. Put any at random.
+   - If nothing of the above is applicable, then throw any of the candidate cards at random.
+
+The strategy above can be improved. Moreover, the computer can play even better if it keeps track of the cards that have been played. However, our goal isn't a complex algorithm for the computer, but to learn how to apply the strategy.
 
 ## Objectives
-If the player throws a card that has the same suit or rank as the top card on the table, print the score and the cards won by each player with the message:
-```
-Player wins cards
-Score: Player 2 - Computer 0
-Cards: Player 5 - Computer 0
-```
+Implement the strategy above.
 
-The second line shows the total points. The third line shows the number of cards for each player (here, the numbers are random).
-
-If the computer throws a card that has the same suit or rank as the top card on the table, print the score and the cards won by each player with the message:
+For testing purposes, print the computer cards in hand. Every time the computer plays, print an extra line. It should contain the computer cards in hand separated by one space, just before the computer plays its card (Example 1):
 ```
-Computer wins cards
-Score: Player 2 - Computer 1
-Cards: Player 5 - Computer 5
+4 cards on the table, and the top card is A♣
+6♣ 8♣ Q♦ 10♦ Q♥ 4♠
+Computer plays 6♣
 ```
-
-If there are no cards on the table, print the message `No cards on the table` instead of `X cards on the table, and the top card is Y`.
-
-When the game ends, <b>add the points of the remaining cards</b> and print the score and the cards won before the `Game Over` message:
-```
-Score: Player 6 - Computer 17
-Cards: Player 12 - Computer 40
-Game Over
-```
-
-Since this is the final score, the sum of cards should be 52, and the sum of points should be 23.
 
 ## Examples
 The greater-than symbol followed by a space (`> `) represents the user input. Note that it's not part of the input.
 
-The examples have been shortened.
-
-<b>Example 1:</b> <i>standard execution; player first</i>
+<b>Example 1:</b> <i>a new line with computer's cards in hand</i>
 ```
 Indigo Card Game
 Play first?
-> yes
-Initial cards on the table: 5♦ J♦ K♣ 5♠
+no
+Initial cards on the table: 6♣ 7♥ 3♦ 4♥
 
-4 cards on the table, and the top card is 5♠
-Cards in hand: 1)J♠ 2)8♦ 3)2♦ 4)6♥ 5)2♣ 6)A♦
-Choose a card to play (1-6):
-> 1
-Player wins cards
-Score: Player 3 - Computer 0
-Cards: Player 5 - Computer 0
-
-No cards on the table
-Computer plays Q♠
-
-1 cards on the table, and the top card is Q♠
-Cards in hand: 1)8♦ 2)2♦ 3)6♥ 4)2♣ 5)A♦
-Choose a card to play (1-5):
-> 2
-
-2 cards on the table, and the top card is 2♦
-Computer plays 7♠
-
-3 cards on the table, and the top card is 7♠
-Cards in hand: 1)8♦ 2)6♥ 3)2♣ 4)A♦
-Choose a card to play (1-4):
-> 3
-
-4 cards on the table, and the top card is 2♣
-Computer plays 5♣
+4 cards on the table, and the top card is 4♥
+8♣ 3♠ 8♥ K♥ 2♦ K♦
+Computer plays 8♥
 Computer wins cards
-Score: Player 3 - Computer 1
-Cards: Player 5 - Computer 5
-
-No cards on the table
-Cards in hand: 1)8♦ 2)6♥ 3)A♦
-Choose a card to play (1-3):
-> 1
-
-1 cards on the table, and the top card is 8♦
-Computer plays 4♦
-Computer wins cards
-Score: Player 3 - Computer 1
-Cards: Player 5 - Computer 7
-
-
-...................................
-...................................
-...................................
-
-
-1 cards on the table, and the top card is K♥
-Cards in hand: 1)3♥ 2)2♥
-Choose a card to play (1-2):
-> 2
-Player wins cards
-Score: Player 12 - Computer 8
-Cards: Player 26 - Computer 23
-
-No cards on the table
-Computer plays 9♠
-
-1 cards on the table, and the top card is 9♠
-Cards in hand: 1)3♥
-Choose a card to play (1-1):
-> 1
-
-2 cards on the table, and the top card is 3♥
-Computer plays 6♣
-
-3 cards on the table, and the top card is 6♣
-Score: Player 15 - Computer 8
-Cards: Player 29 - Computer 23
-Game Over
-```
-
-<b>Example 2:</b> <i>standard execution; computer first</i>
-```
-Indigo Card Game
-Play first?
-> no
-Initial cards on the table: A♠ 10♠ 2♣ J♦
-
-4 cards on the table, and the top card is J♦
-Computer plays 2♦
-Computer wins cards
-Score: Player 0 - Computer 3
+Score: Player 0 - Computer 0
 Cards: Player 0 - Computer 5
 
 No cards on the table
-Cards in hand: 1)9♥ 2)J♠ 3)9♦ 4)7♦ 5)10♣ 6)5♠
+Cards in hand: 1)J♦ 2)4♠ 3)J♣ 4)A♦ 5)5♠ 6)Q♦
 Choose a card to play (1-6):
-> 1
+exit
+Game Over
+```
 
-1 cards on the table, and the top card is 9♥
-Computer plays 3♣
+<b>Example 2:</b> <i>one card in hand</i>
+```
+......
 
-2 cards on the table, and the top card is 3♣
-Cards in hand: 1)J♠ 2)9♦ 3)7♦ 4)10♣ 5)5♠
-Choose a card to play (1-5):
-> 5
+1 cards on the table, and the top card is K♣
+8♥
+Computer plays 8♥
 
-3 cards on the table, and the top card is 5♠
-Computer plays Q♦
+......
+```
 
-4 cards on the table, and the top card is Q♦
-Cards in hand: 1)J♠ 2)9♦ 3)7♦ 4)10♣
-Choose a card to play (1-4):
-> 2
-Player wins cards
-Score: Player 1 - Computer 3
-Cards: Player 5 - Computer 5
+<b>Example 3:</b> <i>only one candidate card</i>
+```
+......
+
+3 cards on the table, and the top card is K♥
+K♦ J♠ Q♣
+Computer plays K♦
+Computer wins cards
+Score: Player 3 - Computer 7
+Cards: Player 8 - Computer 15
+
+......
+```
+
+<b>Example 4:</b> <i>no cards on the table; various suits</i>
+```
+......
 
 No cards on the table
-Computer plays 4♣
+6♣ K♦ Q♣ 2♥
+Computer plays 6♣
 
-1 cards on the table, and the top card is 4♣
-Cards in hand: 1)J♠ 2)7♦ 3)10♣
-Choose a card to play (1-3):
-> 1
+......
+```
 
-2 cards on the table, and the top card is J♠
-Computer plays 7♣
+<b>Example 5:</b> <i>no cards on the table; various ranks (different suits)</i>
+```
+......
+
+No cards on the table
+2♥ 3♠ 3♦ 4♣
+Computer plays 3♠
+
+......
+```
+
+<b>Example 6:</b> <i>cards on the table, but no candidate card; various suits</i>
+```
+......
 
 3 cards on the table, and the top card is 7♣
-Cards in hand: 1)7♦ 2)10♣
-Choose a card to play (1-2):
-> 1
-Player wins cards
-Score: Player 2 - Computer 3
-Cards: Player 9 - Computer 5
+Q♦ J♦ 10♠ 2♥
+Computer plays Q♦
 
-No cards on the table
-Computer plays 5♦
+......
+```
 
+<b>Example 7:</b> <i>cards on the table, but no candidate card; various ranks (different suits)</i>
+```
+......
 
-...................................
-...................................
-...................................
+3 cards on the table, and the top card is 8♦
+6♠ J♥ 6♣
+Computer plays 6♠
 
+......
+```
 
-3 cards on the table, and the top card is 3♥
-Computer plays 9♣
+<b>Example 8:</b> <i>two or more candidate cards with the same suit</i>
+```
+......
 
-4 cards on the table, and the top card is 9♣
-Cards in hand: 1)7♠ 2)K♦
-Choose a card to play (1-2):
-> 2
-
-5 cards on the table, and the top card is K♦
+1 cards on the table, and the top card is 5♥
+9♦ J♥ J♦ 2♥ 5♠
 Computer plays J♥
+Computer wins cards
+Score: Player 5 - Computer 1
+Cards: Player 12 - Computer 7
 
-6 cards on the table, and the top card is J♥
-Cards in hand: 1)7♠
-Choose a card to play (1-1):
-> 1
+......
+```
 
-7 cards on the table, and the top card is 7♠
-Score: Player 17 - Computer 6
-Cards: Player 35 - Computer 17
-Game Over
+<b>Example 9:</b> <i>two or more candidate cards with the same rank</i>
+```
+......
+
+3 cards on the table, and the top card is 5♣
+5♠ 5♥ 9♣ 2♦
+Computer plays 5♥
+Computer wins cards
+Score: Player 0 - Computer 3
+Cards: Player 0 - Computer 9
+
+......
 ```
