@@ -30,4 +30,8 @@ class CardDeck {
         return removedCards
     }
 
+    fun isEmpty(): Boolean {
+        return deck.isEmpty()
+    }
+
 }

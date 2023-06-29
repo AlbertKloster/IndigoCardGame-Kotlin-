@@ -16,5 +16,9 @@ class CardDeckService {
         return cardDeck.get(numberOfCards)
     }
 
+    fun isEmptyDeck(): Boolean {
+        return cardDeck.isEmpty()
+    }
+
 
 }
